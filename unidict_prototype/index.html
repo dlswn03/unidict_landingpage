@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unidict — 전공추천 고도화 프로토타입</title>
+  <meta name="description" content="가톨릭관동대학교 Unidict 전공추천 솔루션">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/tree.css">
+</head>
+<body>
+
+  <!-- ─── HEADER ─────────────────────────────── -->
+  <header class="hdr" id="hdr">
+    <div class="hdr__logo">
+      <div class="hdr__logo-icon" aria-hidden="true">🌱</div>
+      <span class="hdr__logo-text">Unidict</span>
+      <span class="hdr__school">가톨릭관동대학교</span>
+    </div>
+    <div class="hdr__center">
+      <div class="mode-pill">⚙ 설계 모드 · 3학년 2학기</div>
+    </div>
+    <div class="hdr__right">
+      <span class="prog-label" aria-hidden="true">설계 완성도</span>
+      <div class="prog-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="이번 학기 설계 완성도">
+        <div class="prog-fill" id="pFill"></div>
+      </div>
+      <span class="prog-pct" id="pPct" aria-live="polite">0%</span>
+    </div>
+  </header>
+
+  <!-- ─── MAIN ────────────────────────────────── -->
+  <main class="main" id="main">
+
+    <!-- Chat Panel -->
+    <section class="panel panel--chat" id="panelChat" role="region" aria-label="AI 상담 챗봇">
+
+      <div class="cp-head">
+        <div class="cp-avatar" aria-hidden="true">🤖</div>
+        <div class="cp-info">
+          <div class="cp-title">Unidict AI 상담사</div>
+          <div class="cp-sub">AI 융합 전공 · 3학년 2학기 설계 세션</div>
+        </div>
+        <div class="cp-status" aria-label="온라인 상태"></div>
+      </div>
+
+      <!-- 메시지 영역 -->
+      <div class="chat-msgs" id="msgs" role="log" aria-live="polite" aria-label="채팅 메시지 목록"></div>
+
+      <!-- 선택지 버튼 -->
+      <div class="chat-opts" id="chatOpts">
+        <p class="opts-lbl" aria-hidden="true">빠른 선택</p>
+        <div class="opts-grid" id="opts" role="group" aria-label="응답 선택지"></div>
+      </div>
+
+      <!-- ★ 자유 텍스트 입력창 -->
+      <div class="chat-input" id="chatInput">
+        <input
+          type="text"
+          id="freeInput"
+          class="chat-input__field"
+          placeholder="과목, 진로, 학점 등 자유롭게 물어보세요..."
+          autocomplete="off"
+          aria-label="자유 메시지 입력"
+          maxlength="200"
+        />
+        <button id="sendBtn" class="chat-input__send" aria-label="전송">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M14 8L2 2l2.5 6L2 14l12-6z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- Tree Panel -->
+    <section class="panel panel--tree" id="panelTree" role="region" aria-label="학업 설계 트리">
+      <div class="tp-head">
+        <span class="tp-title">전공 · 교과 · 진로 — 학업 설계 트리</span>
+        <nav class="legend" role="list" aria-label="범례">
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--lk"></span>고정</div>
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--cf"></span>확정</div>
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--un"></span>미결정</div>
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--bl"></span>미래</div>
+        </nav>
+      </div>
+
+      <div class="tp-body" id="tpBody">
+        <svg id="tree" viewBox="0 0 580 715" xmlns="http://www.w3.org/2000/svg"
+             role="img" aria-label="학업 설계 트리 시각화">
+          <title>학업 설계 트리</title>
+        </svg>
+      </div>
+
+      <!-- 모바일 진도 바 -->
+      <div class="mob-prog" id="mobProg" aria-hidden="true">
+        <span class="mob-prog__label">설계 완성도</span>
+        <div class="mob-prog__bar">
+          <div class="mob-prog__fill" id="mobPFill"></div>
+        </div>
+        <span class="mob-prog__pct" id="mobPPct">0%</span>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── MOBILE TAB BAR ──────────────────────── -->
+  <nav class="mob-tabs" id="mobTabs" role="tablist" aria-label="화면 전환">
+    <button class="mob-tab mob-tab--active" id="tabChat"
+            role="tab" aria-selected="true" aria-controls="panelChat">
+      <span class="mob-tab__icon" aria-hidden="true">💬</span>
+      <span class="mob-tab__label">상담</span>
+    </button>
+    <button class="mob-tab" id="tabTree"
+            role="tab" aria-selected="false" aria-controls="panelTree">
+      <span class="mob-tab__icon" aria-hidden="true">🌲</span>
+      <span class="mob-tab__label">트리</span>
+      <span class="mob-tab__badge" id="treeBadge" aria-label="업데이트됨"></span>
+    </button>
+  </nav>
+
+  <script src="js/data.js"></script>
+  <script src="js/tree.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>

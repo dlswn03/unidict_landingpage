@@ -1,0 +1,120 @@
+/* ═══════════════════════════════════════════════
+   TREE.CSS — 트리 패널 & SVG 노드 스타일 (라이트 테마)
+═══════════════════════════════════════════════ */
+
+/* ─── TREE PANEL HEADER ──────────────────────── */
+.tp-head {
+  height: 56px; /* 챗봇 헤더와 동일하게 높이 고정 */
+  padding: 0 16px;
+  border-bottom: 1px solid #E2E8F0;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.tp-title {
+  font-size: 11px;
+  color: #64748B;
+  font-weight: 500;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── LEGEND ─────────────────────────────────── */
+.legend {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.lgd-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  color: #94A3B8;
+  white-space: nowrap;
+}
+
+.lgd-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.lgd-dot--lk { background: #F1F5F9; border: 1px solid #CBD5E1; }
+.lgd-dot--cf { background: #ECFDF5; border: 1.5px solid #10B981; }
+.lgd-dot--un { background: #FFFFFF; border: 1.5px dashed #8B5CF6; }
+.lgd-dot--bl { background: #F8FAFC; border: 1px solid #E2E8F0; opacity: .7; }
+
+/* ─── TREE BODY ───────────────────────────────── */
+.tp-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: var(--tree-bg);
+}
+
+.tp-body::-webkit-scrollbar { width: 4px; }
+.tp-body::-webkit-scrollbar-track { background: transparent; }
+.tp-body::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
+.tp-body::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* ─── SVG ────────────────────────────────────── */
+#tree {
+  display: block;
+  width: 100%;
+}
+
+/* ─── NODE TRANSITIONS ───────────────────────── */
+[id^="nd-"] rect,
+[id^="nd-"] text {
+  transition: fill .45s var(--ease), stroke .45s var(--ease), opacity .35s var(--ease);
+}
+
+/* ─── CONFIRM FLASH ──────────────────────────── */
+@keyframes confirm-flash {
+  0%   { opacity: 1; }
+  18%  { opacity: .25; }
+  42%  { opacity: 1; }
+  68%  { opacity: .6; }
+  100% { opacity: 1; }
+}
+
+.node-flash { animation: confirm-flash .8s var(--ease); }
+
+/* ─── CAREER NODE HOVER ──────────────────────── */
+.career-g { cursor: pointer; }
+.career-g rect { transition: opacity .18s var(--ease), transform .18s var(--ease); }
+.career-g:hover rect { opacity: .85; }
+
+/* ─── SCORE BAR GROW ─────────────────────────── */
+@keyframes score-grow {
+  from { transform: scaleX(.8); transform-origin: left; }
+  to   { transform: scaleX(1);  transform-origin: left; }
+}
+.score-updated rect:last-of-type { animation: score-grow .55s var(--ease); }
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media (max-width: 900px) {
+  .tp-title { display: none; }
+  .tp-head { justify-content: flex-end; }
+}
+
+@media (max-width: 640px) {
+  .legend { gap: 8px; }
+  .lgd-item { font-size: 9px; gap: 3px; }
+  .lgd-dot { width: 8px; height: 8px; }
+  .tp-head { padding: 8px 12px; background: #FFFFFF; height: auto; min-height: 40px; }
+  #tree { min-height: 580px; }
+}

@@ -1,0 +1,387 @@
+/* ═══════════════════════════════════════════════
+   MAIN.CSS — 레이아웃, 헤더, 반응형 시스템
+═══════════════════════════════════════════════ */
+
+/* ─── RESET ──────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── DESIGN TOKENS ──────────────────────────── */
+:root {
+  /* Brand */
+  --green:        #10B981;
+  --green-dark:   #065F46;
+  --green-bg:     #ECFDF5;
+  --green-pale:   #F0FDF9;
+  --purple:       #7C3AED;
+  --amber:        #F59E0B;
+  --blue:         #3B82F6;
+
+  /* UI surfaces */
+  --white:        #ffffff;
+  --chat-bg:      #F8F7F4;
+  --tree-bg:      #F4F7FB;
+
+  /* Text */
+  --text:         #111827;
+  --text-2:       #6B7280;
+  --text-3:       #9CA3AF;
+
+  /* Border */
+  --border:       #E5E7EB;
+  --border-2:     #F3F4F6;
+
+  /* Layout */
+  --hdr-h:        52px;
+  --tabs-h:       0px;
+
+  /* Motion */
+  --ease:         cubic-bezier(.4, 0, .2, 1);
+  --dur-fast:     .15s;
+  --dur-med:      .25s;
+  --dur-slow:     .4s;
+
+  /* Type */
+  --font:         'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Radius */
+  --r-sm:  4px;
+  --r-md:  8px;
+  --r-lg:  14px;
+  --r-pill: 999px;
+}
+
+/* ─── BASE ───────────────────────────────────── */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font);
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── HEADER ─────────────────────────────────── */
+.hdr {
+  height: var(--hdr-h);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 100;
+  position: relative;
+}
+
+/* Logo group */
+.hdr__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.hdr__logo-icon {
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(16,185,129,.3);
+}
+
+.hdr__logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -.2px;
+}
+
+.hdr__school {
+  font-size: 11px;
+  color: var(--text-2);
+  border-left: 1px solid var(--border);
+  padding-left: 10px;
+  white-space: nowrap;
+}
+
+/* Center (mode badge) */
+.hdr__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.mode-pill {
+  background: #EFF6FF;
+  color: #1D4ED8;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid #BFDBFE;
+  white-space: nowrap;
+  letter-spacing: .1px;
+}
+
+/* Right (progress) */
+.hdr__right {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.prog-label {
+  font-size: 11px;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.prog-bar {
+  width: 110px;
+  height: 5px;
+  background: #E5E7EB;
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.prog-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: var(--r-pill);
+  width: 0%;
+  transition: width 1s var(--ease);
+}
+
+.prog-pct {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  min-width: 30px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── MAIN LAYOUT ────────────────────────────── */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ─── PANELS ─────────────────────────────────── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel--chat {
+  width: 40%;
+  min-width: 300px;
+  border-right: 1px solid var(--border);
+  background: var(--chat-bg);
+  flex-shrink: 0;
+}
+
+.panel--tree {
+  flex: 1;
+  background: var(--tree-bg);
+  min-width: 0;
+}
+
+/* ─── MOBILE TAB BAR ─────────────────────────── */
+.mob-tabs {
+  display: none;
+}
+
+/* ─── MOBILE PROGRESS ────────────────────────── */
+.mob-prog {
+  display: none;
+}
+
+/* ─── SCREEN READER ONLY ─────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — TABLET (≤900px)
+═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .hdr__school { display: none; }
+
+  .panel--chat {
+    width: 44%;
+    min-width: 260px;
+  }
+
+  .prog-bar { width: 80px; }
+  .prog-label { display: none; }
+
+  .hdr__right { gap: 5px; }
+}
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE — MOBILE (≤640px)
+═══════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  :root { --tabs-h: 56px; }
+
+  /* Compact header */
+  .hdr {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .hdr__center { flex: none; }
+
+  /* Hide desktop progress — shown in tree panel on mobile */
+  .hdr__right { display: none; }
+
+  /* Full-screen panel stacking */
+  .main {
+    position: relative;
+    flex-direction: column;
+  }
+
+  .panel {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    min-width: unset;
+    border-right: none;
+    transition: opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
+  }
+
+  .panel.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .panel--chat.is-hidden { transform: translateX(-12px); }
+  .panel--tree.is-hidden { transform: translateX(12px); }
+
+  /* Tab bar */
+  .mob-tabs {
+    display: flex;
+    height: var(--tabs-h);
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 100;
+  }
+
+  .mob-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-2);
+    transition: color var(--dur-fast);
+    font-family: var(--font);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0;
+  }
+
+  .mob-tab--active { color: var(--green); }
+
+  .mob-tab__icon { font-size: 20px; line-height: 1; }
+  .mob-tab__label { font-size: 10px; font-weight: 500; }
+
+  /* Badge for "tree updated" indicator */
+  .mob-tab__badge {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: calc(50% - 14px);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 1.5px solid var(--white);
+    animation: badge-pop .25s var(--ease);
+  }
+
+  .mob-tab__badge.is-visible { display: block; }
+
+  @keyframes badge-pop {
+    from { transform: scale(0); }
+    to   { transform: scale(1); }
+  }
+
+  /* Mobile progress bar in tree panel */
+  .mob-prog {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    background: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+    flex-shrink: 0;
+  }
+
+  .mob-prog__label {
+    font-size: 10px;
+    color: #94A3B8;
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  .mob-prog__bar {
+    width: 90px;
+    height: 4px;
+    background: #E2E8F0;
+    border-radius: var(--r-pill);
+    overflow: hidden;
+  }
+
+  .mob-prog__fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: var(--r-pill);
+    width: 0%;
+    transition: width 1s var(--ease);
+  }
+
+  .mob-prog__pct {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    min-width: 28px;
+    font-variant-numeric: tabular-nums;
+  }
+}
