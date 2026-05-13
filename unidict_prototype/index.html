@@ -21,7 +21,11 @@
       <span class="hdr__school">가톨릭관동대학교</span>
     </div>
     <div class="hdr__center">
-      <div class="mode-pill">⚙ 설계 모드 · 3학년 2학기</div>
+      <div class="mode-toggle" id="modeToggle">
+        <button class="mode-btn mode-btn--active" id="btnDesign" onclick="App.switchMode('design')">⚙ 설계 모드</button>
+        <button class="mode-btn" id="btnExplore" onclick="App.switchMode('explore')">🔍 탐구 모드</button>
+      </div>
+      <span class="mode-sub" id="modeSub">3학년 2학기</span>
     </div>
     <div class="hdr__right">
       <span class="prog-label" aria-hidden="true">설계 완성도</span>

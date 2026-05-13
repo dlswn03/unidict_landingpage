@@ -12,7 +12,8 @@ window.UniChat = (() => {
      공개 API: 스텝 시작
   ═══════════════════════════════════════════ */
   function showStep(stepId) {
-    const step = AppData.chatFlow[stepId];
+    const step = AppData.chatFlow[stepId]
+      || (AppData.exploreData && AppData.exploreData.chatFlow[stepId]);
     if (!step) return;
     _currentStepId = stepId;
 

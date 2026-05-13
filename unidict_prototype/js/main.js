@@ -8,7 +8,44 @@ window.App = (() => {
     hilightCareer: null,
     progressPct: 0,
     mobileTab: 'chat',
+    currentMode: 'design',
+    exploreMajor: null,
   };
+
+  /* ─── 모드 전환 ──────────────────────────── */
+  function switchMode(mode) {
+    if (state.currentMode === mode) return;
+    state.currentMode = mode;
+    state.exploreMajor = null;
+
+    // 버튼 활성 상태
+    const btnD = document.getElementById('btnDesign');
+    const btnE = document.getElementById('btnExplore');
+    if (btnD) btnD.classList.toggle('mode-btn--active', mode === 'design');
+    if (btnE) btnE.classList.toggle('mode-btn--active', mode === 'explore');
+
+    // 헤더 컨텍스트 라벨 업데이트
+    const sub = document.getElementById('modeSub');
+    if (sub) sub.textContent = mode === 'design' ? '3학년 2학기' : '복수전공 탐구';
+
+    // 진도바 표시 여부
+    const hdrRight = document.querySelector('.hdr__right');
+    if (hdrRight) hdrRight.style.visibility = mode === 'design' ? '' : 'hidden';
+
+    // 채팅 초기화
+    const msgs = document.getElementById('msgs');
+    if (msgs) msgs.innerHTML = '';
+    document.getElementById('opts').innerHTML = '';
+
+    // tpBody 재초기화 (다른 모드 SVG 레이아웃 재시작)
+    const tpBody = document.getElementById('tpBody');
+    if (tpBody) delete tpBody.dataset.init;
+
+    // 트리 렌더 + 챗봇 시작
+    UniTree.render();
+    const startStep = mode === 'design' ? 's0' : 'ex_start';
+    setTimeout(() => UniChat.showStep(startStep), 400);
+  }
 
   /* ─── 진도 바 ────────────────────────────── */
   function updateProgress(pct) {
@@ -113,7 +150,7 @@ window.App = (() => {
     setTimeout(() => UniChat.showStep('s0'), 700);
   }
 
-  return { state, updateProgress, switchTab, notifyTreeUpdate, init };
+  return { state, updateProgress, switchTab, switchMode, notifyTreeUpdate, init };
 
 })();
 

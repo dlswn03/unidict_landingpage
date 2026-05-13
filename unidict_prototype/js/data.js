@@ -671,3 +671,313 @@ window.AppData = (() => {
 // 전역 단축 함수 (chatFlow action 클로저에서 사용)
 function getCourse(id) { return AppData.getCourse(id); }
 function getCareer(id) { return AppData.getCareer(id); }
+
+/* ═══════════════════════════════════════════════
+   탐구 모드 데이터
+   3학년 2학기 페르소나 — 복수전공·전과 고려
+═══════════════════════════════════════════════ */
+window.AppData.exploreData = (() => {
+
+  const majors = {
+
+    cs: {
+      id: 'cs', name: '컴퓨터공학',
+      tag: 'CS · 시스템 · 소프트웨어',
+      color: '#3B82F6', colorBg: '#EFF6FF',
+      overlapCredits: 12, extraCredits: 21,
+      desc: '운영체제·네트워크·보안 등 CS 기초를 탄탄히 쌓는 전공',
+      careers: [
+        { id:'be',  name:'백엔드 개발자',  score: 58 },
+        { id:'se',  name:'SW 엔지니어',    score: 65 },
+        { id:'sec', name:'보안 전문가',     score: 40 },
+        { id:'dev', name:'DevOps 엔지니어', score: 50 },
+      ],
+      courses: [
+        { id:'ce01', name:'데이터구조',      row:0, col:0, cols:3, type:'overlap' },
+        { id:'ce02', name:'알고리즘',        row:0, col:1, cols:3, type:'overlap' },
+        { id:'ce03', name:'데이터베이스',    row:0, col:2, cols:3, type:'overlap' },
+        { id:'ce04', name:'운영체제',        row:1, col:0, cols:3, type:'req' },
+        { id:'ce05', name:'컴퓨터네트워크',  row:1, col:1, cols:3, type:'req' },
+        { id:'ce06', name:'컴퓨터구조',      row:1, col:2, cols:3, type:'req' },
+        { id:'ce07', name:'소프트웨어공학',  row:2, col:0, cols:3, type:'req' },
+        { id:'ce08', name:'정보보안',        row:2, col:1, cols:3, type:'ele' },
+        { id:'ce09', name:'컴파일러',        row:2, col:2, cols:3, type:'ele' },
+        { id:'ce10', name:'SW 프로젝트',     row:3, col:0, cols:2, type:'req' },
+        { id:'ce11', name:'클라우드시스템',  row:3, col:1, cols:2, type:'ele' },
+      ],
+    },
+
+    ai: {
+      id: 'ai', name: 'AI 융합',
+      tag: '현재 주전공',
+      color: '#10B981', colorBg: '#ECFDF5',
+      overlapCredits: null, extraCredits: null,
+      desc: '현재 AI 융합 주전공 — 머신러닝·딥러닝·NLP 심화',
+      careers: [
+        { id:'ml',   name:'ML 엔지니어',  score: 72 },
+        { id:'data', name:'데이터분석가', score: 58 },
+        { id:'res',  name:'AI 연구원',    score: 45 },
+        { id:'svc',  name:'서비스기획자', score: 30 },
+      ],
+      courses: [
+        { id:'ae01', name:'딥러닝',        row:0, col:0, cols:3, type:'overlap' },
+        { id:'ae02', name:'자연어처리',    row:0, col:1, cols:3, type:'overlap' },
+        { id:'ae03', name:'머신러닝기초',  row:0, col:2, cols:3, type:'overlap' },
+        { id:'ae04', name:'강화학습',      row:1, col:0, cols:3, type:'req' },
+        { id:'ae05', name:'컴퓨터비전',    row:1, col:1, cols:3, type:'req' },
+        { id:'ae06', name:'MLOps',         row:1, col:2, cols:3, type:'req' },
+        { id:'ae07', name:'빅데이터처리',  row:2, col:0, cols:3, type:'req' },
+        { id:'ae08', name:'AI서비스기획',  row:2, col:1, cols:3, type:'ele' },
+        { id:'ae09', name:'클라우드컴퓨팅',row:2, col:2, cols:3, type:'ele' },
+        { id:'ae10', name:'캡스톤디자인I', row:3, col:0, cols:2, type:'req' },
+        { id:'ae11', name:'졸업논문',      row:3, col:1, cols:2, type:'req' },
+      ],
+    },
+
+    ds: {
+      id: 'ds', name: '데이터사이언스',
+      tag: '통계 · 분석 · 비즈니스',
+      color: '#8B5CF6', colorBg: '#F5F3FF',
+      overlapCredits: 15, extraCredits: 18,
+      desc: 'R·SQL·통계 기반 데이터 분석 전문가 과정',
+      careers: [
+        { id:'da',  name:'데이터분석가', score: 72 },
+        { id:'ds2', name:'데이터 과학자', score: 60 },
+        { id:'bi',  name:'BI 전문가',    score: 50 },
+        { id:'pm2', name:'서비스기획자', score: 38 },
+      ],
+      courses: [
+        { id:'de01', name:'파이썬기초',   row:0, col:0, cols:4, type:'overlap' },
+        { id:'de02', name:'확률과통계',   row:0, col:1, cols:4, type:'overlap' },
+        { id:'de03', name:'데이터시각화', row:0, col:2, cols:4, type:'overlap' },
+        { id:'de04', name:'데이터베이스', row:0, col:3, cols:4, type:'overlap' },
+        { id:'de05', name:'R 프로그래밍', row:1, col:0, cols:3, type:'req' },
+        { id:'de06', name:'통계학 심화',  row:1, col:1, cols:3, type:'req' },
+        { id:'de07', name:'SQL 고급',     row:1, col:2, cols:3, type:'req' },
+        { id:'de08', name:'데이터마이닝', row:2, col:0, cols:3, type:'req' },
+        { id:'de09', name:'예측모델링',   row:2, col:1, cols:3, type:'req' },
+        { id:'de10', name:'비즈니스분석', row:2, col:2, cols:3, type:'ele' },
+        { id:'de11', name:'DS 캡스톤',    row:3, col:0, cols:2, type:'req' },
+        { id:'de12', name:'데이터거버넌스',row:3, col:1, cols:2, type:'ele' },
+      ],
+    },
+  };
+
+  /* ─── 탐구 모드 챗 플로우 ─────────────────── */
+  const chatFlow = {
+
+    ex_start: {
+      msgs: [
+        '탐구 모드로 전환했어요 🔍',
+        '현재 <span class="hl">AI 융합 3학년 2학기</span>이신데, 복수전공이나 전과를 고민 중이시죠?',
+        '추천 전공 3개를 트리로 탐색해볼 수 있어요. 어디서 시작할까요?',
+      ],
+      opts: [
+        {
+          text: '💻 컴퓨터공학 살펴보기',
+          action: () => { App.state.exploreMajor = 'cs'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_cs',
+        },
+        {
+          text: '📊 데이터사이언스 살펴보기',
+          action: () => { App.state.exploreMajor = 'ds'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_ds',
+        },
+        {
+          text: '🌱 현재 AI 융합 전공 보기',
+          action: () => { App.state.exploreMajor = 'ai'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_ai',
+        },
+      ],
+    },
+
+    /* ── 컴퓨터공학 ─────────────────────────── */
+    ex_cs: {
+      msgs: [
+        '컴퓨터공학 복수전공을 살펴볼게요 💻',
+        '현재 이수 과목 중 <span class="hl">12학점이 중복 인정</span>돼요 (데이터구조, 알고리즘, DB)',
+        '추가로 <span class="hl">약 21학점</span>을 이수하면 복수전공 요건 충족이에요.',
+        '트리에서 CS 커리큘럼을 확인해보세요!',
+      ],
+      opts: [
+        { text: '어떤 과목을 들어야 하나요?', action: null, next: 'ex_cs_courses' },
+        { text: '진로는 어떻게 되나요?', action: null, next: 'ex_cs_career' },
+        {
+          text: '📊 DS 전공과 비교하기',
+          action: () => { App.state.exploreMajor = 'ds'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_compare',
+        },
+      ],
+    },
+
+    ex_cs_courses: {
+      msgs: [
+        '3-2학기부터 바로 수강 가능한 CS 과목이에요 📚',
+        '<span class="hl">운영체제</span> — 시스템 이해의 핵심, CS 면접 1순위',
+        '<span class="hl">컴퓨터네트워크</span> — 백엔드·DevOps 모든 직군 필수',
+        '<span class="hl">컴퓨터구조</span> — 로우레벨 이해, 성능 최적화 역량',
+        '이번 학기 1~2개 추가 수강으로 복수전공을 바로 시작할 수 있어요!',
+      ],
+      opts: [
+        { text: 'CS 복수전공 신청하고 싶어요', action: null, next: 'ex_cs_apply' },
+        {
+          text: 'DS 전공도 볼게요',
+          action: () => { App.state.exploreMajor = 'ds'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_ds',
+        },
+      ],
+    },
+
+    ex_cs_career: {
+      msgs: [
+        'CS 복수전공 후 진출 가능한 진로예요 🎯',
+        '<span class="hl">SW 엔지니어 65%</span> — AI 융합 + CS 조합으로 풀스택 역량',
+        '<span class="hl">백엔드 개발자 58%</span> — 시스템 이해도 높은 백엔드',
+        '<span class="hl">DevOps 엔지니어 50%</span> — 인프라·배포 파이프라인 전문가',
+        '현재 ML 엔지니어 방향에 시스템 역량이 더해져 희소성이 올라가요!',
+      ],
+      opts: [
+        { text: '수강 과목 계획 보기', action: null, next: 'ex_cs_courses' },
+        { text: '전공 비교 요약', action: null, next: 'ex_compare' },
+      ],
+    },
+
+    ex_cs_apply: {
+      msgs: [
+        'CS 복수전공 신청 가이드예요 📋',
+        '• 신청 시기: 매 학기 초 1~2주차 학생처 접수',
+        '• 최소 이수 학점: 33학점 (중복 인정 12학점 포함)',
+        '• 지금 3-2학기가 복수전공 신청 타이밍으로 적절해요!',
+        '설계 모드에서 남은 학기 수강 계획을 같이 짜봐요.',
+      ],
+      opts: [
+        { text: '설계 모드에서 계획 잡기', action: () => App.switchMode('design'), next: null },
+        {
+          text: 'DS도 비교해볼게요',
+          action: () => { App.state.exploreMajor = 'ds'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_ds',
+        },
+      ],
+    },
+
+    /* ── 데이터사이언스 ──────────────────────── */
+    ex_ds: {
+      msgs: [
+        '데이터사이언스 복수전공을 살펴볼게요 📊',
+        '현재 이수 과목 중 <span class="hl">15학점이 중복 인정</span>돼요 (파이썬, 확률통계, 시각화, DB)',
+        '추가로 <span class="hl">약 18학점</span>이면 복수전공 요건 충족이에요.',
+        'AI 융합과 시너지가 가장 높은 전공이에요!',
+      ],
+      opts: [
+        { text: '어떤 과목을 들어야 하나요?', action: null, next: 'ex_ds_courses' },
+        { text: '진로는 어떻게 되나요?', action: null, next: 'ex_ds_career' },
+        {
+          text: '💻 CS 전공과 비교하기',
+          action: () => { App.state.exploreMajor = 'cs'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_compare',
+        },
+      ],
+    },
+
+    ex_ds_courses: {
+      msgs: [
+        '데이터사이언스 추가 필수 과목이에요 📈',
+        '<span class="hl">R 프로그래밍</span> — 통계 분석의 표준 언어, 비즈니스 현장 필수',
+        '<span class="hl">통계학 심화</span> — 모델 해석력과 보고서 작성 역량 강화',
+        '<span class="hl">SQL 고급</span> — 데이터분석가 채용 1순위 요구 기술',
+        'AI 융합에서 분석 베이스가 갖춰져 있어서 학습 부담이 낮아요!',
+      ],
+      opts: [
+        { text: 'DS 복수전공 신청하고 싶어요', action: null, next: 'ex_ds_apply' },
+        {
+          text: 'CS와 비교해볼게요',
+          action: () => { App.state.exploreMajor = 'cs'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_cs',
+        },
+      ],
+    },
+
+    ex_ds_career: {
+      msgs: [
+        'DS 복수전공 후 진출 진로예요 🎯',
+        '<span class="hl">데이터분석가 72%</span> — AI 융합 + DS로 연결도 최대 달성',
+        '<span class="hl">데이터 과학자 60%</span> — 통계 + ML 완전체 조합',
+        '<span class="hl">BI 전문가 50%</span> — 비즈니스 인텔리전스 전문 분야',
+        '현재 AI 융합만으로 58%인 데이터분석가가 72%까지 올라가요!',
+      ],
+      opts: [
+        { text: 'DS 과목 계획 보기', action: null, next: 'ex_ds_courses' },
+        { text: '전공 비교 요약', action: null, next: 'ex_compare' },
+      ],
+    },
+
+    ex_ds_apply: {
+      msgs: [
+        'DS 복수전공 신청 가이드예요 📋',
+        '• 신청 시기: 매 학기 초 학생처 접수',
+        '• 최소 이수 학점: 33학점 (중복 인정 15학점 포함)',
+        '• AI 융합과 과목 중복이 가장 많아 <span class="hl">이번 학기 신청을 강력 추천!</span>',
+        '설계 모드에서 남은 학기 수강 계획을 같이 짜봐요.',
+      ],
+      opts: [
+        { text: '설계 모드에서 계획 잡기', action: () => App.switchMode('design'), next: null },
+        {
+          text: 'CS도 비교해볼게요',
+          action: () => { App.state.exploreMajor = 'cs'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_cs',
+        },
+      ],
+    },
+
+    /* ── AI 융합 현황 ────────────────────────── */
+    ex_ai: {
+      msgs: [
+        'AI 융합 현재 전공 현황이에요 🌱',
+        '3학년까지 이수한 AI 융합 커리큘럼과 진로 연결도예요.',
+        '<span class="hl">ML 엔지니어 72%</span> · 데이터분석가 58% · AI 연구원 45%',
+        '이 전공을 강화하면서 복수전공으로 다른 영역을 확장할 수 있어요!',
+      ],
+      opts: [
+        {
+          text: '💻 CS 복수전공 탐구',
+          action: () => { App.state.exploreMajor = 'cs'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_cs',
+        },
+        {
+          text: '📊 DS 복수전공 탐구',
+          action: () => { App.state.exploreMajor = 'ds'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_ds',
+        },
+        { text: '두 전공 비교 요약', action: null, next: 'ex_compare' },
+      ],
+    },
+
+    /* ── 비교 요약 ──────────────────────────── */
+    ex_compare: {
+      msgs: [
+        '두 전공 복수전공 비교 요약이에요 ⚖️',
+        '<span class="hl">컴퓨터공학:</span> 중복 12학점 · 추가 21학점 · 시스템·보안 역량',
+        '<span class="hl">데이터사이언스:</span> 중복 15학점 · 추가 18학점 · 분석·비즈니스 역량',
+        'DS가 중복 인정이 많아 부담이 적고, CS는 차별화 포인트가 강해요.',
+        '3-2학기 신청이 가장 좋은 타이밍이에요!',
+      ],
+      opts: [
+        {
+          text: 'CS 더 자세히 보기',
+          action: () => { App.state.exploreMajor = 'cs'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_cs',
+        },
+        {
+          text: 'DS 더 자세히 보기',
+          action: () => { App.state.exploreMajor = 'ds'; UniTree.render(); App.notifyTreeUpdate(); },
+          next: 'ex_ds',
+        },
+        { text: '설계 모드로 돌아가기', action: () => App.switchMode('design'), next: null },
+      ],
+    },
+
+  };
+
+  return { majors, chatFlow };
+
+})();

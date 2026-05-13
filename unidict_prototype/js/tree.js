@@ -49,6 +49,11 @@ window.UniTree = (() => {
   }
 
   function render() {
+    if (App.state.currentMode === 'explore') {
+      _renderExplore();
+      return;
+    }
+
     const container = document.getElementById('tpBody');
     if (!container) return;
 
@@ -74,6 +79,14 @@ window.UniTree = (() => {
     const svgTop = document.getElementById('tree-top');
     const svgMid = document.getElementById('tree-mid');
     const svgBot = document.getElementById('tree-bot');
+
+    // 탐구 모드에서 설계 모드로 돌아올 때 숨겼던 wrap 복원
+    const tw = document.getElementById('tree-top-wrap');
+    const bw = document.getElementById('tree-bot-wrap');
+    if (tw) tw.style.display = '';
+    if (bw) bw.style.display = '';
+    // 탐구 모드에서 적용된 inline style 초기화
+    svgMid.style.cssText = 'display:block;width:100%;';
 
     svgTop.innerHTML = '';
     svgMid.innerHTML = '';
@@ -443,6 +456,258 @@ window.UniTree = (() => {
     }, textStr));
 
     svg.appendChild(g);
+  }
+
+  /* ═══════════════════════════════════════════
+     탐구 모드 렌더러
+  ═══════════════════════════════════════════ */
+
+  const EXPLORE_STYLE = {
+    overlap: { fill:'#F0FDF9', stroke:'#10B981', text:'#065F46', sw:1.5, label:'중복인정' },
+    req:     { fill:'#F5F3FF', stroke:'#8B5CF6', text:'#5B21B6', sw:1.5, label:'필수' },
+    ele:     { fill:'#EFF6FF', stroke:'#3B82F6', text:'#1D4ED8', sw:1,   label:'선택' },
+  };
+
+  const EXPLORE_ROWS = [
+    { label:'이미 이수 · 중복인정',      color:'#10B981' },
+    { label:'지금 추가 가능 (3-2학기)',  color:'#8B5CF6' },
+    { label:'4-1학기 권장',              color:'#6366F1' },
+    { label:'4-2학기 · 졸업 전',        color:'#94A3B8' },
+  ];
+
+  function _renderExplore() {
+    const container = document.getElementById('tpBody');
+    if (!container) return;
+
+    if (!container.dataset.init) {
+      container.style.display = 'flex';
+      container.style.flexDirection = 'column';
+      container.style.overflow = 'hidden';
+      container.innerHTML = `
+        <div id="tree-top-wrap" style="flex-shrink:0;z-index:10;background:#fff;border-bottom:1px solid #E2E8F0;">
+          <svg id="tree-top" viewBox="0 0 580 80" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+        <div id="tree-mid-wrap" style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--tree-bg);scroll-behavior:smooth;">
+          <svg id="tree-mid" style="display:block;width:100%;"></svg>
+        </div>
+        <div id="tree-bot-wrap" style="flex-shrink:0;z-index:10;background:#fff;border-top:1px solid #E2E8F0;">
+          <svg id="tree-bot" viewBox="0 0 580 90" style="display:block;width:100%;height:auto;"></svg>
+        </div>
+      `;
+      container.dataset.init = 'true';
+    }
+
+    const svgTop = document.getElementById('tree-top');
+    const svgMid = document.getElementById('tree-mid');
+    const svgBot = document.getElementById('tree-bot');
+    const topWrap = document.getElementById('tree-top-wrap');
+    const botWrap = document.getElementById('tree-bot-wrap');
+    svgTop.innerHTML = '';
+    svgMid.innerHTML = '';
+    svgBot.innerHTML = '';
+
+    const majorId = App.state.exploreMajor;
+
+    if (!majorId) {
+      // 흰 상단/하단 패널 숨김 → 하늘색 배경이 패널 전체를 채움
+      if (topWrap) topWrap.style.display = 'none';
+      if (botWrap) botWrap.style.display = 'none';
+      _drawExploreLanding(svgMid);
+      return;
+    }
+
+    // 전공 선택 시 상단/하단 복원
+    if (topWrap) topWrap.style.display = '';
+    if (botWrap) botWrap.style.display = '';
+
+    const md = AppData.exploreData.majors[majorId];
+    if (!md) return;
+
+    /* ── top: 진로 노드 ── */
+    _drawSectionTitle(svgTop, `탐구 중: ${md.name} — 연결 진로`, 16);
+    const cw = 106, ch = 22, cgap = 10;
+    const ctotal = md.careers.length * cw + (md.careers.length - 1) * cgap;
+    const cstart = (SVG_W - ctotal) / 2;
+    md.careers.forEach((c, i) => {
+      const cx = cstart + i * (cw + cgap);
+      const cy = 36;
+      const g = el('g');
+      const scoreRatio = c.score / 100;
+      const barColor = c.score >= 60 ? md.color : '#94A3B8';
+      g.appendChild(el('rect', { x:cx, y:cy-ch/2, width:cw, height:ch, rx:ch/2,
+        fill:md.colorBg, stroke:md.color, 'stroke-width':'1' }));
+      g.appendChild(el('text', { x:cx+cw/2, y:cy, 'text-anchor':'middle',
+        'dominant-baseline':'middle', 'font-size':'9', fill:md.color,
+        'font-family':'Noto Sans KR,sans-serif', 'font-weight':'600' }, c.name));
+      // score bar
+      const bx = cx+4, by = cy+ch/2+3, bw = cw-8;
+      g.appendChild(el('rect', { x:bx, y:by, width:bw, height:3, rx:1.5, fill:'#E2E8F0' }));
+      g.appendChild(el('rect', { x:bx, y:by, width:bw*scoreRatio, height:3, rx:1.5, fill:barColor }));
+      g.appendChild(el('text', { x:cx+cw/2, y:by+11, 'text-anchor':'middle',
+        'font-size':'7.5', fill:md.color, 'font-family':'Noto Sans KR,sans-serif',
+        'font-weight':'500' }, `${c.score}%`));
+      svgTop.appendChild(g);
+    });
+
+    /* ── mid: 교과 노드 ── */
+    const rowGap = 72;
+    const rowY0 = 44;
+    const midH = rowY0 + 3 * rowGap + 50;
+    svgMid.setAttribute('viewBox', `0 0 580 ${midH}`);
+
+    // 섹션 타이틀
+    _drawSectionTitle(svgMid, '교과 레이어 · 복수전공 수강 로드맵', 18);
+
+    // row labels + highlight bands
+    EXPLORE_ROWS.forEach((row, ri) => {
+      const ry = rowY0 + ri * rowGap;
+      // band
+      svgMid.appendChild(el('rect', { x:0, y:ry-26, width:SVG_W, height:48,
+        fill: ri % 2 === 0 ? '#FAFBFC' : '#F4F7FB' }));
+      // label
+      svgMid.appendChild(el('text', { x:LEFT-5, y:ry,
+        'text-anchor':'end', 'dominant-baseline':'middle',
+        'font-size':'6.5', fill:row.color, 'font-weight':'600',
+        'font-family':'Noto Sans KR,sans-serif' }, row.label));
+    });
+
+    // course nodes
+    md.courses.forEach(c => _drawExploreNode(svgMid, c, rowY0 + c.row * rowGap, md));
+
+    /* ── bot: 전공 카드 + 학점 요약 ── */
+    _drawSectionTitle(svgBot, '전공 레이어', 16);
+    const mw = 320, mh = 44, mx = (SVG_W - mw) / 2, my = 26;
+    svgBot.appendChild(el('rect', { x:mx, y:my, width:mw, height:mh, rx:10,
+      fill:md.colorBg, stroke:md.color, 'stroke-width':1.5 }));
+    svgBot.appendChild(el('text', { x:mx+mw/2, y:my+15, 'text-anchor':'middle',
+      'dominant-baseline':'middle', 'font-size':'11', fill:md.color,
+      'font-family':'Noto Sans KR,sans-serif', 'font-weight':'700' },
+      md.id === 'ai' ? `🔒 ${md.name} (현재 주전공)` : `◎ ${md.name} 복수전공`));
+
+    if (md.overlapCredits) {
+      svgBot.appendChild(el('text', { x:mx+mw/2, y:my+31, 'text-anchor':'middle',
+        'dominant-baseline':'middle', 'font-size':'8.5', fill:md.color,
+        'font-family':'Noto Sans KR,sans-serif' },
+        `중복인정 ${md.overlapCredits}학점 포함 · 추가 필요 ${md.extraCredits}학점`));
+    }
+
+    // 전공 탭 클릭 — 다른 전공 탐색
+    const otherMajors = Object.values(AppData.exploreData.majors).filter(m => m.id !== majorId);
+    otherMajors.forEach((m, i) => {
+      const sw = 120, sx = 20 + i * (sw + 10), sy = 26;
+      const g = el('g', { style:'cursor:pointer;' });
+      g.appendChild(el('rect', { x:sx, y:sy, width:sw, height:mh, rx:8,
+        fill:'#F8FAFC', stroke:'#E2E8F0', 'stroke-width':1, opacity:'0.8' }));
+      g.appendChild(el('text', { x:sx+sw/2, y:sy+mh/2+1, 'text-anchor':'middle',
+        'dominant-baseline':'middle', 'font-size':'9', fill:'#64748B',
+        'font-family':'Noto Sans KR,sans-serif' }, m.name));
+      g.addEventListener('click', () => {
+        App.state.exploreMajor = m.id;
+        UniTree.render();
+      });
+      svgBot.appendChild(g);
+    });
+  }
+
+  function _drawExploreNode(svg, c, cy, md) {
+    const s = EXPLORE_STYLE[c.type];
+    const x = colX(c.col, c.cols);
+    const y = cy - NH / 2;
+    const g = el('g');
+
+    const rect = el('rect', { x, y, width:NW, height:NH, rx:NR,
+      fill:s.fill, stroke:s.stroke, 'stroke-width':s.sw });
+    g.appendChild(rect);
+
+    // 상태 배지
+    const ICON = { overlap:'✓', req:'●', ele:'○' };
+    const iColor = { overlap:'#10B981', req:'#8B5CF6', ele:'#3B82F6' };
+    g.appendChild(el('text', { x:x+7, y:cy, 'text-anchor':'start',
+      'dominant-baseline':'middle', 'font-size':'8', fill:iColor[c.type],
+      'font-family':'Noto Sans KR,sans-serif' }, ICON[c.type]));
+
+    // 과목명
+    let name = c.name;
+    if (name.length > 8) name = name.slice(0,7) + '..';
+    g.appendChild(el('text', { x:x+17, y:cy, 'text-anchor':'start',
+      'dominant-baseline':'middle', 'font-size':'9.5', fill:s.text,
+      'font-family':'Noto Sans KR,sans-serif',
+      'font-weight': c.type === 'overlap' ? '500' : '400' }, name));
+
+    // 타입 배지
+    const tcolor = { overlap:'#10B981', req:'#8B5CF6', ele:'#3B82F6' };
+    g.appendChild(el('rect', { x:x+NW-24, y:y+3, width:21, height:9, rx:2,
+      fill:tcolor[c.type], opacity:'.5' }));
+    g.appendChild(el('text', { x:x+NW-13.5, y:y+8.5, 'text-anchor':'middle',
+      'font-size':'5.5', 'font-family':'Noto Sans KR,sans-serif', fill:'#fff' },
+      s.label));
+
+    svg.appendChild(g);
+  }
+
+  function _drawExploreLanding(svg) {
+    // 전체 패널을 채우도록 넉넉한 viewBox 설정
+    svg.setAttribute('viewBox', '0 0 580 480');
+    svg.style.cssText = 'display:block;width:100%;min-height:100%;';
+
+    // 헤더 텍스트 — 카드 위 중앙 정렬 (카드 상단 y=160 기준)
+    svg.appendChild(el('text', { x:SVG_W/2, y:108, 'text-anchor':'middle',
+      'font-size':'13', fill:'#475569', 'font-family':'Noto Sans KR,sans-serif',
+      'font-weight':'600' }, '탐구할 전공을 선택해주세요'));
+
+    svg.appendChild(el('text', { x:SVG_W/2, y:128, 'text-anchor':'middle',
+      'font-size':'10', fill:'#94A3B8', 'font-family':'Noto Sans KR,sans-serif' },
+      '카드를 클릭하거나 채팅에서 선택할 수 있어요'));
+
+    const majorList = Object.values(AppData.exploreData.majors);
+    const cw = 162, ch = 110, cgap = 14;
+    const total = majorList.length * cw + (majorList.length - 1) * cgap;
+    const startX = (SVG_W - total) / 2;
+    const cardTop = 150;
+
+    majorList.forEach((m, i) => {
+      const cx = startX + i * (cw + cgap);
+      const g = el('g', { style:'cursor:pointer;' });
+
+      // 카드 배경
+      g.appendChild(el('rect', { x:cx, y:cardTop, width:cw, height:ch, rx:12,
+        fill:m.colorBg, stroke:m.color, 'stroke-width':1.5 }));
+
+      // 전공명
+      g.appendChild(el('text', { x:cx+cw/2, y:cardTop+26, 'text-anchor':'middle',
+        'font-size':'12', fill:m.color, 'font-family':'Noto Sans KR,sans-serif',
+        'font-weight':'700' }, m.name));
+
+      // 태그 (서브타이틀)
+      g.appendChild(el('text', { x:cx+cw/2, y:cardTop+44, 'text-anchor':'middle',
+        'font-size':'8', fill:m.color, 'font-family':'Noto Sans KR,sans-serif',
+        opacity:'0.75' }, m.tag));
+
+      // 구분선
+      g.appendChild(el('line', { x1:cx+16, y1:cardTop+54, x2:cx+cw-16, y2:cardTop+54,
+        stroke:m.color, 'stroke-width':'0.6', opacity:'0.25' }));
+
+      // 학점 배지 — 모든 카드 동일 구조
+      const badgeText = m.overlapCredits
+        ? `중복인정 ${m.overlapCredits}학점 · 추가 ${m.extraCredits}학점`
+        : '현재 주전공';
+      g.appendChild(el('rect', { x:cx+12, y:cardTop+62, width:cw-24, height:18, rx:5,
+        fill:m.color, opacity:'.13' }));
+      g.appendChild(el('text', { x:cx+cw/2, y:cardTop+71, 'text-anchor':'middle',
+        'dominant-baseline':'middle', 'font-size':'8', fill:m.color,
+        'font-family':'Noto Sans KR,sans-serif', 'font-weight':'600' }, badgeText));
+
+      // 하단 클릭 힌트
+      g.appendChild(el('text', { x:cx+cw/2, y:cardTop+97, 'text-anchor':'middle',
+        'font-size':'8', fill:m.color, 'font-family':'Noto Sans KR,sans-serif',
+        opacity:'0.5' }, '클릭하여 탐구 →'));
+
+      g.addEventListener('click', () => {
+        App.state.exploreMajor = m.id;
+        UniTree.render();
+      });
+      svg.appendChild(g);
+    });
   }
 
   function flashNode(id) {
