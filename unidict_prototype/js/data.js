@@ -802,7 +802,16 @@ window.AppData.exploreData = (() => {
       ],
       opts: [
         { text: '어떤 과목을 들어야 하나요?', action: null, next: 'ex_cs_courses' },
-        { text: '진로는 어떻게 되나요?', action: null, next: 'ex_cs_career' },
+        {
+          text: '진로는 어떻게 되나요?',
+          action: () => {
+            const md = AppData.exploreData.majors['cs'];
+            const top = [...md.careers].sort((a, b) => b.score - a.score)[0];
+            App.state.exploreCareer = top.id;
+            UniTree.render(); App.notifyTreeUpdate();
+          },
+          next: 'ex_cs_career',
+        },
         {
           text: '📊 DS 전공과 비교하기',
           action: () => { App.state.exploreMajor = 'ds'; UniTree.render(); App.notifyTreeUpdate(); },
@@ -871,7 +880,16 @@ window.AppData.exploreData = (() => {
       ],
       opts: [
         { text: '어떤 과목을 들어야 하나요?', action: null, next: 'ex_ds_courses' },
-        { text: '진로는 어떻게 되나요?', action: null, next: 'ex_ds_career' },
+        {
+          text: '진로는 어떻게 되나요?',
+          action: () => {
+            const md = AppData.exploreData.majors['ds'];
+            const top = [...md.careers].sort((a, b) => b.score - a.score)[0];
+            App.state.exploreCareer = top.id;
+            UniTree.render(); App.notifyTreeUpdate();
+          },
+          next: 'ex_ds_career',
+        },
         {
           text: '💻 CS 전공과 비교하기',
           action: () => { App.state.exploreMajor = 'cs'; UniTree.render(); App.notifyTreeUpdate(); },

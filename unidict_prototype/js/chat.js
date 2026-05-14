@@ -6,7 +6,13 @@
 window.UniChat = (() => {
 
   let _currentStepId = null;
-  let _inputLocked = false;   // 메시지 출력 중 입력 잠금
+  let _inputLocked = false;
+  let _timers = [];  // 진행 중인 setTimeout ID 목록
+
+  function _clearTimers() {
+    _timers.forEach(clearTimeout);
+    _timers = [];
+  }
 
   /* ═══════════════════════════════════════════
      공개 API: 스텝 시작
@@ -17,7 +23,8 @@ window.UniChat = (() => {
     if (!step) return;
     _currentStepId = stepId;
 
-    // 선택지 영역 비우기
+    // 이전 스텝의 지연 콜백 취소
+    _clearTimers();
     _clearOpts();
     _inputLocked = true;
 
@@ -25,17 +32,23 @@ window.UniChat = (() => {
     const delay = 680;
 
     msgs.forEach((msg, i) => {
-      if (i > 0) setTimeout(_showTyping, i * delay - 180);
-      setTimeout(() => addMsg('bot', msg), i * delay);
+      if (i > 0) _timers.push(setTimeout(_showTyping, i * delay - 180));
+      _timers.push(setTimeout(() => addMsg('bot', msg), i * delay));
     });
 
     // 선택지 및 입력창 활성화
     const total = msgs.length * delay + 200;
-    setTimeout(() => {
+    _timers.push(setTimeout(() => {
       _renderOpts(step.opts || []);
       _inputLocked = false;
       _updateInputState();
-    }, total);
+    }, total));
+  }
+
+  /* 공개 API: 모드 전환 시 진행 중인 타이머 즉시 취소 */
+  function cancelPending() {
+    _clearTimers();
+    _inputLocked = false;
   }
 
   /* ═══════════════════════════════════════════
@@ -86,6 +99,10 @@ window.UniChat = (() => {
       btn.addEventListener('click', () => _handleOptChoice(opt));
       grid.appendChild(btn);
     });
+
+    // 버튼 추가로 opts 영역 높이가 늘어나 마지막 메시지가 가려지지 않도록 재스크롤
+    const wrap = document.getElementById('msgs');
+    requestAnimationFrame(() => requestAnimationFrame(() => _scrollBottom(wrap)));
   }
 
   function _clearOpts() {
@@ -159,6 +176,16 @@ window.UniChat = (() => {
     {
       keys: ['진로', '취업', '직업', '커리어', '직무'],
       msg: '현재 교과 이력 기반 진로 연결도: <span class="hl">ML 엔지니어 72%</span> · 데이터분석가 58% · AI 연구원 45% · 서비스기획 30%에요. 트리 상단 진로 노드를 클릭하면 연결 교과를 볼 수 있어요!',
+      action: () => {
+        if (App.state.currentMode !== 'explore') return;
+        const md = AppData.exploreData.majors[App.state.exploreMajor];
+        if (!md) return;
+        const top = [...md.careers].sort((a, b) => b.score - a.score)[0];
+        if (!top) return;
+        App.state.exploreCareer = top.id;
+        UniTree.render();
+        App.notifyTreeUpdate();
+      },
     },
     {
       keys: ['학점', '이수', '몇 학점', '졸업'],
@@ -215,6 +242,6 @@ window.UniChat = (() => {
   }
 
   /* ─── 공개 API ───────────────────────────── */
-  return { showStep, addMsg, handleFreeInput };
+  return { showStep, addMsg, handleFreeInput, cancelPending };
 
 })();

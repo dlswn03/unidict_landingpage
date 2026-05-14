@@ -34,7 +34,8 @@ window.App = (() => {
     const hdrRight = document.querySelector('.hdr__right');
     if (hdrRight) hdrRight.style.visibility = mode === 'design' ? '' : 'hidden';
 
-    // 채팅 초기화
+    // 채팅 초기화 (진행 중인 타이머 먼저 취소)
+    UniChat.cancelPending();
     const msgs = document.getElementById('msgs');
     if (msgs) msgs.innerHTML = '';
     document.getElementById('opts').innerHTML = '';
