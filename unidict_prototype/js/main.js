@@ -151,6 +151,50 @@ window.App = (() => {
     UniTree.render();
   }
 
+  /* ─── 진로 모달 ──────────────────────────── */
+  function openCareerModal(careerId, score) {
+    const detail = AppData.careerDetails && AppData.careerDetails[careerId];
+    if (!detail) return;
+
+    const th = score >= 70 ? { bg:'#ECFDF5', text:'#065F46' }
+             : score >= 50 ? { bg:'#EFF6FF', text:'#1D4ED8' }
+             : score >= 35 ? { bg:'#F5F3FF', text:'#5B21B6' }
+             :               { bg:'#F8FAFC', text:'#64748B' };
+
+    const badge = document.getElementById('cmodScoreBadge');
+    badge.textContent = `연결도 ${score}%`;
+    badge.style.background = th.bg;
+    badge.style.color = th.text;
+
+    document.getElementById('cmodName').textContent = detail.name;
+    document.getElementById('cmodDesc').textContent = detail.desc;
+    document.getElementById('cmodSalary').textContent = '💰 ' + detail.salary;
+    document.getElementById('cmodCompanies').textContent = '🏢 ' + detail.companies;
+
+    document.getElementById('cmodExtra').innerHTML =
+      detail.extra.map(e => `<li>${e}</li>`).join('');
+
+    const todoEl = document.getElementById('cmodTodo');
+    todoEl.innerHTML = detail.todo.map(t => `<li>${t}</li>`).join('');
+    todoEl.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => li.classList.toggle('is-checked'));
+    });
+
+    // 패널 상단으로 스크롤
+    const panel = document.querySelector('.cmod__panel');
+    if (panel) panel.scrollTop = 0;
+
+    const modal = document.getElementById('careerModal');
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeCareerModal() {
+    const modal = document.getElementById('careerModal');
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
   /* ─── 초기화 ─────────────────────────────── */
   function init() {
     UniTree.render();
@@ -166,11 +210,18 @@ window.App = (() => {
     let t;
     window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(_onResize, 150); });
 
+    // 모달 닫기 이벤트
+    document.getElementById('cmodClose')?.addEventListener('click', closeCareerModal);
+    document.getElementById('cmodBackdrop')?.addEventListener('click', closeCareerModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCareerModal();
+    });
+
     // 챗봇 시작
     setTimeout(() => UniChat.showStep('s0'), 700);
   }
 
-  return { state, updateProgress, switchTab, switchMode, notifyTreeUpdate, init };
+  return { state, updateProgress, switchTab, switchMode, notifyTreeUpdate, openCareerModal, closeCareerModal, init };
 
 })();
 

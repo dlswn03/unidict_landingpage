@@ -64,7 +64,7 @@ window.UniTree = (() => {
 
       container.innerHTML = `
         <div id="tree-top-wrap" style="flex-shrink: 0; z-index: 10; background: #FFFFFF; border-bottom: 1px solid #E2E8F0;">
-          <svg id="tree-top" viewBox="0 0 580 80" style="display: block; width: 100%; height: auto;"></svg>
+          <svg id="tree-top" viewBox="0 0 580 96" style="display: block; width: 100%; height: auto;"></svg>
         </div>
         <div id="tree-mid-wrap" style="flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--tree-bg); scroll-behavior: smooth;">
           <svg id="tree-mid" style="display: block; width: 100%;"></svg>
@@ -88,6 +88,7 @@ window.UniTree = (() => {
     // 탐구 모드에서 적용된 inline style 초기화
     svgMid.style.cssText = 'display:block;width:100%;';
 
+    svgTop.setAttribute('viewBox', '0 0 580 96');
     svgTop.innerHTML = '';
     svgMid.innerHTML = '';
     svgBot.innerHTML = '';
@@ -398,6 +399,22 @@ window.UniTree = (() => {
       fill:isHL ? th.text : '#94A3B8', 'font-weight': isHL ? '600' : '400',
     }, `${car.score}%`));
 
+    // 자세히 보기 버튼 (클릭해도 하이라이트 토글 안 됨)
+    const dbY = by + 14;
+    const dbX = bx, dbW = bw;
+    const btnG = el('g', { style:'cursor:pointer;' });
+    btnG.appendChild(el('rect', { x:dbX, y:dbY, width:dbW, height:12, rx:6,
+      fill:'#F1F5F9', stroke:'#E2E8F0', 'stroke-width':'0.8' }));
+    btnG.appendChild(el('text', { x:x+PW/2, y:dbY+6,
+      'text-anchor':'middle', 'dominant-baseline':'middle',
+      'font-size':'7', 'font-family':'Noto Sans KR,sans-serif',
+      fill:'#64748B' }, '자세히 보기 →'));
+    btnG.addEventListener('click', (e) => {
+      e.stopPropagation();
+      App.openCareerModal(car.id, car.score);
+    });
+    g.appendChild(btnG);
+
     g.addEventListener('click', () => {
       App.state.hilightCareer = App.state.hilightCareer === car.id ? null : car.id;
       render();
@@ -472,7 +489,7 @@ window.UniTree = (() => {
       container.style.overflow = 'hidden';
       container.innerHTML = `
         <div id="tree-top-wrap" style="flex-shrink:0;z-index:10;background:#fff;border-bottom:1px solid #E2E8F0;">
-          <svg id="tree-top" viewBox="0 0 580 80" style="display:block;width:100%;height:auto;"></svg>
+          <svg id="tree-top" viewBox="0 0 580 96" style="display:block;width:100%;height:auto;"></svg>
         </div>
         <div id="tree-mid-wrap" style="flex:1;overflow-y:auto;overflow-x:hidden;background:var(--tree-bg);scroll-behavior:smooth;">
           <svg id="tree-mid" style="display:block;width:100%;"></svg>
@@ -489,6 +506,7 @@ window.UniTree = (() => {
     const svgBot = document.getElementById('tree-bot');
     const topWrap = document.getElementById('tree-top-wrap');
     const botWrap = document.getElementById('tree-bot-wrap');
+    svgTop.setAttribute('viewBox', '0 0 580 96');
     svgTop.innerHTML = '';
     svgMid.innerHTML = '';
     svgBot.innerHTML = '';
@@ -544,6 +562,21 @@ window.UniTree = (() => {
         'font-size':'7.5', 'font-family':'Noto Sans KR,sans-serif',
         fill: isCarHL ? th.text : '#94A3B8', 'font-weight': isCarHL ? '600' : '400' },
         `${c.score}%`));
+
+      // 자세히 보기 버튼
+      const dbY = by + 14;
+      const exploreBtnG = el('g', { style:'cursor:pointer;' });
+      exploreBtnG.appendChild(el('rect', { x:bx, y:dbY, width:bw, height:12, rx:6,
+        fill:'#F1F5F9', stroke:'#E2E8F0', 'stroke-width':'0.8' }));
+      exploreBtnG.appendChild(el('text', { x:x+PW/2, y:dbY+6,
+        'text-anchor':'middle', 'dominant-baseline':'middle',
+        'font-size':'7', 'font-family':'Noto Sans KR,sans-serif',
+        fill:'#64748B' }, '자세히 보기 →'));
+      exploreBtnG.addEventListener('click', (e) => {
+        e.stopPropagation();
+        App.openCareerModal(c.id, c.score);
+      });
+      g.appendChild(exploreBtnG);
 
       g.addEventListener('click', () => {
         App.state.exploreCareer = App.state.exploreCareer === c.id ? null : c.id;

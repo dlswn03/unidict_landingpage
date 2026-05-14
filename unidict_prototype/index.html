@@ -126,6 +126,30 @@
     </button>
   </nav>
 
+  <!-- ─── CAREER MODAL ────────────────────────── -->
+  <div id="careerModal" class="cmod" aria-hidden="true">
+    <div class="cmod__backdrop" id="cmodBackdrop"></div>
+    <div class="cmod__panel" role="dialog" aria-modal="true" aria-labelledby="cmodName">
+      <button class="cmod__close" id="cmodClose" aria-label="닫기">✕</button>
+      <div class="cmod__score-badge" id="cmodScoreBadge"></div>
+      <h2 class="cmod__name" id="cmodName"></h2>
+      <p class="cmod__desc" id="cmodDesc"></p>
+      <div class="cmod__meta-row">
+        <span class="cmod__meta" id="cmodSalary"></span>
+        <span class="cmod__meta" id="cmodCompanies"></span>
+      </div>
+      <hr class="cmod__divider">
+      <section class="cmod__section">
+        <h3 class="cmod__section-ttl">📚 비교과 프로그램 추천</h3>
+        <ul class="cmod__list" id="cmodExtra"></ul>
+      </section>
+      <section class="cmod__section">
+        <h3 class="cmod__section-ttl">✅ 실천 Todo 리스트</h3>
+        <ul class="cmod__todo" id="cmodTodo"></ul>
+      </section>
+    </div>
+  </div>
+
   <script src="js/data.js"></script>
   <script src="js/tree.js"></script>
   <script src="js/chat.js"></script>
