@@ -50,10 +50,13 @@
   flex-shrink: 0;
 }
 
-.lgd-dot--lk { background: #F1F5F9; border: 1px solid #CBD5E1; }
-.lgd-dot--cf { background: #ECFDF5; border: 1.5px solid #10B981; }
-.lgd-dot--un { background: #FFFFFF; border: 1.5px dashed #8B5CF6; }
-.lgd-dot--bl { background: #F8FAFC; border: 1px solid #E2E8F0; opacity: .7; }
+.lgd-dot--lk      { background: #FFFBEB; border: 1.5px solid #F59E0B; }
+.lgd-dot--cf      { background: #FFF7ED; border: 2px solid #FB923C; }
+.lgd-dot--un      { background: #FFF7ED; border: 1.5px dashed #FB923C; }
+.lgd-dot--bl      { background: #F8FAFC; border: 1px solid #E2E8F0; opacity: .7; }
+.lgd-dot--overlap { background: #ECFDF5; border: 1.5px solid #10B981; }
+.lgd-dot--req     { background: #EFF6FF; border: 1.5px solid #3B82F6; }
+.lgd-dot--ele     { background: #F5F3FF; border: 1px solid #8B5CF6; }
 
 /* ─── TREE BODY ───────────────────────────────── */
 .tp-body {

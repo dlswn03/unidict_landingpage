@@ -10,6 +10,7 @@ window.App = (() => {
     mobileTab: 'chat',
     currentMode: 'design',
     exploreMajor: null,
+    exploreCareer: null,
   };
 
   /* ─── 모드 전환 ──────────────────────────── */
@@ -17,6 +18,7 @@ window.App = (() => {
     if (state.currentMode === mode) return;
     state.currentMode = mode;
     state.exploreMajor = null;
+    state.exploreCareer = null;
 
     // 버튼 활성 상태
     const btnD = document.getElementById('btnDesign');
@@ -40,6 +42,23 @@ window.App = (() => {
     // tpBody 재초기화 (다른 모드 SVG 레이아웃 재시작)
     const tpBody = document.getElementById('tpBody');
     if (tpBody) delete tpBody.dataset.init;
+
+    // 범례 업데이트
+    const legend = document.querySelector('.legend');
+    if (legend) {
+      if (mode === 'explore') {
+        legend.innerHTML = `
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--overlap"></span>중복인정</div>
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--req"></span>필수</div>
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--ele"></span>선택</div>`;
+      } else {
+        legend.innerHTML = `
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--lk"></span>고정</div>
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--cf"></span>확정</div>
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--un"></span>미결정</div>
+          <div class="lgd-item" role="listitem"><span class="lgd-dot lgd-dot--bl"></span>미래</div>`;
+      }
+    }
 
     // 트리 렌더 + 챗봇 시작
     UniTree.render();

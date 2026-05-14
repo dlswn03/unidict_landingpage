@@ -17,9 +17,9 @@ window.UniTree = (() => {
   let collapsed = true;
 
   const STATUS_STYLE = {
-    locked:    { fill:'#F1F5F9', stroke:'#CBD5E1', text:'#64748B', sw:1   },
-    confirmed: { fill:'#ECFDF5', stroke:'#10B981', text:'#065F46', sw:1.5 },
-    undecided: { fill:'#FFFFFF', stroke:'#8B5CF6', text:'#6D28D9', sw:1.5, dash:'5 3' },
+    locked:    { fill:'#FFFBEB', stroke:'#F59E0B', text:'#92400E', sw:1.5 },
+    confirmed: { fill:'#FFF7ED', stroke:'#FB923C', text:'#9A3412', sw:1.5 },
+    undecided: { fill:'#FFF7ED', stroke:'#FB923C', text:'#9A3412', sw:1.5, dash:'5 3' },
     blurred:   { fill:'#F8FAFC', stroke:'#E2E8F0', text:'#CBD5E1', sw:0.8 },
   };
 
@@ -138,7 +138,7 @@ window.UniTree = (() => {
     const defs = el('defs');
     const f = el('filter', { id:'glow', x:'-30%', y:'-30%', width:'160%', height:'160%' });
     const blur  = el('feGaussianBlur', { in:'SourceAlpha', stdDeviation:'2', result:'b' });
-    const flood = el('feFlood', { 'flood-color':'#10B981', 'flood-opacity':'.22', result:'c' });
+    const flood = el('feFlood', { 'flood-color':'#FB923C', 'flood-opacity':'.22', result:'c' });
     const comp  = el('feComposite', { in:'c', in2:'b', operator:'in', result:'d' });
     const merge = el('feMerge');
     merge.append(el('feMergeNode', { in:'d' }), el('feMergeNode', { in:'SourceGraphic' }));
@@ -161,54 +161,32 @@ window.UniTree = (() => {
       const isDes  = s === 6;
       const isBlur = s >= 7;
 
-      if (isCur || isDes) {
-        svg.appendChild(el('rect', {
-          x:0, y:cy - 25, width:SVG_W, height:48,
-          fill: isDes ? '#F5F3FF' : '#F0FDF9',
-        }));
-      }
-
-      if (isDes) {
-        svg.appendChild(el('rect', {
-          x:LEFT - 2, y:cy - 22, width:AVAIL + 4, height:42, rx:'5',
-          fill:'none', stroke:'#C4B5FD', 'stroke-width':'1', 'stroke-dasharray':'7 4',
-        }));
-      }
+      // 모든 행에 배경 밴드 (탐구모드와 동일한 디자인)
+      const bandFill = s === 5 ? '#FFFBEB' : s === 6 ? '#FFF7ED' : '#F8FAFC';
+      svg.appendChild(el('rect', {
+        x:0, y:cy - 30, width:SVG_W, height:60,
+        fill: bandFill,
+      }));
 
       if (s < 8) {
         if (!collapsed || s >= 5) {
           const sep = (cy + SY[s + 1]) / 2;
           svg.appendChild(el('line', {
-            x1:LEFT, y1:sep, x2:SVG_W, y2:sep,
+            x1:0, y1:sep, x2:SVG_W, y2:sep,
             stroke:'#E2E8F0', 'stroke-width':'0.8',
           }));
         }
       }
 
-      const lc = isDes ? '#7C3AED' : isCur ? '#059669' : isBlur ? '#CBD5E1' : '#94A3B8';
+      const lc = isDes ? '#C2410C' : isCur ? '#D97706' : isBlur ? '#CBD5E1' : '#94A3B8';
       const lw = (isDes || isCur) ? '600' : '400';
+      const lblText = isCur ? '현재' : isDes ? '설계 중' : semLabels[s];
       svg.appendChild(el('text', {
         x:LEFT - 5, y:cy + 1,
         'text-anchor':'end', 'dominant-baseline':'middle',
         'font-size':'7.5', 'font-family':'Noto Sans KR,sans-serif',
         fill:lc, 'font-weight':lw,
-      }, semLabels[s]));
-
-      const tagCfg = isDes
-        ? { bg:'#EDE9FE', text:'설계 중', tc:'#7C3AED' }
-        : isCur
-          ? { bg:'#D1FAE5', text:'현재', tc:'#059669' }
-          : null;
-
-      if (tagCfg) {
-        const g = el('g');
-        g.appendChild(el('rect', { x:2, y:cy - 7, width:38, height:14, rx:3, fill:tagCfg.bg }));
-        g.appendChild(el('text', {
-          x:21, y:cy + 1, 'text-anchor':'middle', 'dominant-baseline':'middle',
-          'font-size':'7', 'font-family':'Noto Sans KR,sans-serif', fill:tagCfg.tc, 'font-weight':'600',
-        }, tagCfg.text));
-        svg.appendChild(g);
-      }
+      }, lblText));
     }
   }
 
@@ -262,7 +240,7 @@ window.UniTree = (() => {
       const bothSolid = ['locked','confirmed'].includes(fc.status) && ['locked','confirmed'].includes(tc.status);
       const isBlurry  = fc.status === 'blurred' || tc.status === 'blurred';
 
-      const stroke  = isHL ? '#10B981' : bothSolid ? '#94A3B8' : '#CBD5E1';
+      const stroke  = isHL ? '#D97706' : bothSolid ? '#94A3B8' : '#CBD5E1';
       const sw      = isHL ? 2 : 1;
       const opacity = isBlurry ? 0.25 : isHL ? 0.7 : bothSolid ? 0.5 : 0.3;
 
@@ -277,21 +255,22 @@ window.UniTree = (() => {
     const car = AppData.getCareer(cid);
     if (!car) return;
 
+    const th = careerTheme(car.score);
     const cx = colX(car.col, car.cols, PW) + PW / 2;
-    const cy = -20; 
+    const cy = -20;
 
     AppData.courses
       .filter(c => c.car.includes(cid) && c.status !== 'blurred')
       .forEach(c => {
         if (collapsed && c.sem < 5) return;
-        
+
         const ny = SY[c.sem] - NH / 2;
         const nx = colX(c.col, c.cols) + NW / 2;
         const my = (ny + cy) / 2;
 
         svg.appendChild(el('path', {
           d:`M${nx} ${ny} C${nx} ${my},${cx} ${my},${cx} ${cy}`,
-          fill:'none', stroke:'#10B981', 'stroke-width':'1.5',
+          fill:'none', stroke:'#D97706', 'stroke-width':'1.5',
           opacity:'.35', 'stroke-dasharray':'5 4',
         }));
       });
@@ -304,11 +283,12 @@ window.UniTree = (() => {
     const x  = colX(c.col, c.cols);
     const y  = cy - NH / 2;
     const s  = STATUS_STYLE[c.status];
-    const hc = App.state.hilightCareer;
-    const isHL = hc && c.car.includes(hc) && c.status !== 'blurred';
+    const hc    = App.state.hilightCareer;
+    const isHL  = hc && c.car.includes(hc) && c.status !== 'blurred';
+    const CAREER_HL = { fill:'#FEF3C7', stroke:'#D97706', text:'#92400E' };
 
-    const fill   = isHL ? '#DCFCE7' : s.fill;
-    const stroke = isHL ? '#10B981' : s.stroke;
+    const fill   = isHL ? CAREER_HL.fill   : s.fill;
+    const stroke = isHL ? CAREER_HL.stroke : s.stroke;
     const sw     = isHL ? 2 : s.sw;
 
     const g = el('g', { id:`nd-${c.id}` });
@@ -331,41 +311,39 @@ window.UniTree = (() => {
 
     g.appendChild(rect);
 
-    if (c.status !== 'blurred') {
-      const tc = TYPE_COLOR[c.type];
-      g.appendChild(el('rect', { x:x+NW-19, y:y+3, width:16, height:9, rx:2, fill:tc, opacity:'.5' }));
-      g.appendChild(el('text', {
-        x:x+NW-11, y:y+8.5,
-        'text-anchor':'middle', 'font-size':'5.5',
-        'font-family':'Noto Sans KR,sans-serif', fill:'#fff',
-      }, TYPE_LBL[c.type]));
-    }
+    // 타입 배지: blurred(미래)는 gray, 나머지는 타입별 색
+    const badgeFill = c.status === 'blurred' ? '#94A3B8' : TYPE_COLOR[c.type];
+    g.appendChild(el('rect', { x:x+NW-19, y:y+3, width:16, height:9, rx:2, fill:badgeFill, opacity:'.5' }));
+    g.appendChild(el('text', {
+      x:x+NW-11, y:y+8.5,
+      'text-anchor':'middle', 'font-size':'5.5',
+      'font-family':'Noto Sans KR,sans-serif', fill:'#fff',
+    }, TYPE_LBL[c.type]));
 
-    const ICONS = { locked:'■', confirmed:'✓', undecided:'◇', blurred:'' };
-    const ICON_COLORS = { locked:'#94A3B8', confirmed:'#10B981', undecided:'#8B5CF6', blurred:'#CBD5E1' };
+    // 아이콘: locked 또는 현재학기(sem5)→✓, ele→◇, req/gen→□ / blurred는 회색
+    const iconShape = (c.status === 'locked' || c.sem === 5) ? '✓' : c.type === 'ele' ? '◇' : '□';
+    const iconColor = c.status === 'blurred' ? '#CBD5E1'
+      : c.type === 'req' ? '#3B82F6'
+      : c.type === 'ele' ? '#8B5CF6'
+      : '#94A3B8';
+    g.appendChild(el('text', {
+      x:x+7, y:cy,
+      'text-anchor':'start', 'dominant-baseline':'middle',
+      'font-size':'8', fill:iconColor,
+      'font-family':'Noto Sans KR,sans-serif',
+    }, iconShape));
 
-    if (c.status !== 'blurred') {
-      g.appendChild(el('text', {
-        x:x+7, y:cy,
-        'text-anchor':'start', 'dominant-baseline':'middle',
-        'font-size':'8', fill:ICON_COLORS[c.status],
-        'font-family':'Noto Sans KR,sans-serif',
-      }, ICONS[c.status]));
-    }
-
-    const isBlur = c.status === 'blurred';
     let name = c.name;
-    const maxC = isBlur ? 10 : 8;
-    if (name.length > maxC) name = name.slice(0, maxC - 1) + '..';
+    if (name.length > 8) name = name.slice(0, 7) + '..';
 
     g.appendChild(el('text', {
-      x: isBlur ? x + NW / 2 : x + 17,
+      x: x + 17,
       y: cy,
-      'text-anchor': isBlur ? 'middle' : 'start',
+      'text-anchor': 'start',
       'dominant-baseline': 'middle',
-      'font-size': '9.5', 
+      'font-size': '9.5',
       'font-family': 'Noto Sans KR,sans-serif',
-      fill: isHL ? '#065F46' : s.text,
+      fill: isHL ? CAREER_HL.text : s.text,
       'font-weight': c.status === 'confirmed' ? '600' : '400',
     }, name));
 
@@ -431,29 +409,37 @@ window.UniTree = (() => {
   }
 
   function _drawMajor(svg, m, cy) {
-    const x   = colX(m.col, m.cols, MW);
-    const y   = cy - MH / 2;
-    const g   = el('g');
+    const EW = 164, EH = 40, ER = 8;
+    const x  = colX(m.col, m.cols, EW);
+    const y  = cy - EH / 2;
+    const g  = el('g');
 
     g.appendChild(el('rect', {
-      x, y, width:MW, height:MH, rx:MR,
-      fill:   m.selected ? '#FFFBEB' : '#F8FAFC',
-      stroke: m.selected ? '#F59E0B' : '#E2E8F0',
+      x, y, width:EW, height:EH, rx:ER,
+      fill:           m.selected ? '#FFFBEB' : '#F8FAFC',
+      stroke:         m.selected ? '#F59E0B' : '#E2E8F0',
       'stroke-width': m.selected ? 1.5 : 1,
-      opacity: m.selected ? 1 : 0.7,
+      opacity: m.selected ? 1 : 0.75,
     }));
 
-    const textStr = m.selected ? '🔒 ' + m.name : m.name;
-    const textColor = m.selected ? '#92400E' : '#94A3B8';
-    const textWeight = m.selected ? '600' : '400';
-
+    const nameY = m.selected ? cy - 7 : cy + 1;
     g.appendChild(el('text', {
-      x: x + MW / 2, y: cy + 1, 
+      x: x + EW/2, y: nameY,
       'text-anchor': 'middle', 'dominant-baseline': 'middle',
-      'font-size': m.selected ? '10' : '9.5', 
+      'font-size': m.selected ? '10' : '9.5',
       'font-family': 'Noto Sans KR,sans-serif',
-      fill: textColor, 'font-weight': textWeight,
-    }, textStr));
+      fill: m.selected ? '#92400E' : '#94A3B8',
+      'font-weight': m.selected ? '700' : '400',
+    }, m.selected ? `🔒 ${m.name}` : m.name));
+
+    if (m.selected) {
+      g.appendChild(el('text', {
+        x: x + EW/2, y: cy + 9,
+        'text-anchor': 'middle', 'dominant-baseline': 'middle',
+        'font-size': '7.5', 'font-family': 'Noto Sans KR,sans-serif',
+        fill: '#F59E0B', opacity: '0.8',
+      }, '현재 주전공'));
+    }
 
     svg.appendChild(g);
   }
@@ -464,15 +450,15 @@ window.UniTree = (() => {
 
   const EXPLORE_STYLE = {
     overlap: { fill:'#F0FDF9', stroke:'#10B981', text:'#065F46', sw:1.5, label:'중복인정' },
-    req:     { fill:'#F5F3FF', stroke:'#8B5CF6', text:'#5B21B6', sw:1.5, label:'필수' },
-    ele:     { fill:'#EFF6FF', stroke:'#3B82F6', text:'#1D4ED8', sw:1,   label:'선택' },
+    req:     { fill:'#EFF6FF', stroke:'#3B82F6', text:'#1D4ED8', sw:1.5, label:'필수' },
+    ele:     { fill:'#F5F3FF', stroke:'#8B5CF6', text:'#5B21B6', sw:1,   label:'선택' },
   };
 
   // row 0 = 과거(하단), row 3 = 미래(상단) — 표시 순서는 렌더 시 반전
   const EXPLORE_ROWS = [
-    { label:'중복인정', color:'#10B981', bandFill:'#F0FDF9' }, // row 0 — 과거
-    { label:'3-2 추가', color:'#8B5CF6', bandFill:'#F5F3FF' }, // row 1
-    { label:'4-1학기',  color:'#6366F1', bandFill:'#EEF2FF' }, // row 2
+    { label:'중복인정', color:'#F59E0B', bandFill:'#FFFBEB' }, // row 0 — 과거
+    { label:'3-2 추가', color:'#FB923C', bandFill:'#FFF7ED' }, // row 1
+    { label:'4-1학기',  color:'#94A3B8', bandFill:'#F8FAFC' }, // row 2
     { label:'4-2학기',  color:'#94A3B8', bandFill:'#F8FAFC' }, // row 3 — 미래
   ];
 
@@ -524,29 +510,45 @@ window.UniTree = (() => {
     const md = AppData.exploreData.majors[majorId];
     if (!md) return;
 
-    /* ── top: 진로 노드 ── */
-    _drawSectionTitle(svgTop, `탐구 중: ${md.name} — 연결 진로`, 16);
-    const cw = 106, ch = 22, cgap = 10;
-    const ctotal = md.careers.length * cw + (md.careers.length - 1) * cgap;
-    const cstart = (SVG_W - ctotal) / 2;
-    md.careers.forEach((c, i) => {
-      const cx = cstart + i * (cw + cgap);
-      const cy = 36;
-      const g = el('g');
-      const scoreRatio = c.score / 100;
-      const barColor = c.score >= 60 ? md.color : '#94A3B8';
-      g.appendChild(el('rect', { x:cx, y:cy-ch/2, width:cw, height:ch, rx:ch/2,
-        fill:md.colorBg, stroke:md.color, 'stroke-width':'1' }));
-      g.appendChild(el('text', { x:cx+cw/2, y:cy, 'text-anchor':'middle',
-        'dominant-baseline':'middle', 'font-size':'9', fill:md.color,
-        'font-family':'Noto Sans KR,sans-serif', 'font-weight':'600' }, c.name));
-      // score bar
-      const bx = cx+4, by = cy+ch/2+3, bw = cw-8;
+    /* ── top: 진로 노드 — 설계 모드와 동일한 careerTheme + colX 스타일 ── */
+    _drawSectionTitle(svgTop, '진로 레이어', 16);
+    const sortedCareers = [...md.careers].sort((a, b) => b.score - a.score);
+    const carCount = sortedCareers.length;
+    sortedCareers.forEach((c, i) => {
+      const x       = colX(i, carCount, PW);
+      const cy      = 48;
+      const th      = careerTheme(c.score);
+      const isCarHL = App.state.exploreCareer === c.id;
+      const op      = isCarHL ? 1 : 0.62;
+      const g       = el('g', { style:'cursor:pointer;' });
+
+      if (isCarHL) {
+        g.appendChild(el('rect', {
+          x:x-3, y:cy-PH/2-3, width:PW+6, height:PH+6, rx:PH/2+3,
+          fill:th.fill, opacity:'.4',
+        }));
+      }
+      g.appendChild(el('rect', { x, y:cy-PH/2, width:PW, height:PH, rx:PH/2,
+        fill:th.fill, stroke:th.stroke, 'stroke-width': isCarHL ? 1.5 : 0.7, opacity:op }));
+      g.appendChild(el('text', { x:x+PW/2, y:cy, 'text-anchor':'middle',
+        'dominant-baseline':'middle', 'font-size': isCarHL ? '10' : '9.5',
+        'font-family':'Noto Sans KR,sans-serif',
+        fill: isCarHL ? th.text : '#64748B', 'font-weight': isCarHL ? '600' : '400' }, c.name));
+
+      const bx = x+3, by = cy+PH/2+4, bw = PW-6;
+      const filledW = Math.max(0, Math.min(bw, bw * (c.score / 100)));
       g.appendChild(el('rect', { x:bx, y:by, width:bw, height:3, rx:1.5, fill:'#E2E8F0' }));
-      g.appendChild(el('rect', { x:bx, y:by, width:bw*scoreRatio, height:3, rx:1.5, fill:barColor }));
-      g.appendChild(el('text', { x:cx+cw/2, y:by+11, 'text-anchor':'middle',
-        'font-size':'7.5', fill:md.color, 'font-family':'Noto Sans KR,sans-serif',
-        'font-weight':'500' }, `${c.score}%`));
+      g.appendChild(el('rect', { x:bx, y:by, width:filledW, height:3, rx:1.5,
+        fill:th.stroke, opacity: isCarHL ? 1 : 0.55 }));
+      g.appendChild(el('text', { x:x+PW/2, y:by+11, 'text-anchor':'middle',
+        'font-size':'7.5', 'font-family':'Noto Sans KR,sans-serif',
+        fill: isCarHL ? th.text : '#94A3B8', 'font-weight': isCarHL ? '600' : '400' },
+        `${c.score}%`));
+
+      g.addEventListener('click', () => {
+        App.state.exploreCareer = App.state.exploreCareer === c.id ? null : c.id;
+        UniTree.render();
+      });
       svgTop.appendChild(g);
     });
 
@@ -590,7 +592,12 @@ window.UniTree = (() => {
       }, EXPLORE_ROWS[dataRow].label));
     }
 
-    // 5) 교과 노드 — c.row 값 반전: row 3=상단(미래), row 0=하단(과거)
+    // 5) 교과-진로 연결선 (노드보다 먼저 그려야 선이 노드 아래에 위치)
+    if (App.state.exploreCareer) {
+      _drawExploreCareerEdges(svgMid, md, rowY0, rowGap);
+    }
+
+    // 6) 교과 노드 — c.row 값 반전: row 3=상단(미래), row 0=하단(과거)
     md.courses.forEach(c => {
       const vi = NROWS - 1 - c.row;
       _drawExploreNode(svgMid, c, rowY0 + vi * rowGap, md);
@@ -599,6 +606,35 @@ window.UniTree = (() => {
     /* ── bot: 전공 레이어 — 3개 균등 탭 ── */
     _drawSectionTitle(svgBot, '전공 레이어', 16);
     _drawExploreMajorBar(svgBot, majorId);
+  }
+
+  function _drawExploreCareerEdges(svg, md, rowY0, rowGap) {
+    const hc = App.state.exploreCareer;
+    if (!hc) return;
+
+    const sortedCareers = [...md.careers].sort((a, b) => b.score - a.score);
+    const careerIdx = sortedCareers.findIndex(c => c.id === hc);
+    if (careerIdx < 0) return;
+
+    const careerCx = colX(careerIdx, sortedCareers.length, PW) + PW / 2;
+    const targetY  = -20;
+    const NROWS    = EXPLORE_ROWS.length;
+
+    md.courses
+      .filter(c => c.car && c.car.includes(hc))
+      .forEach(c => {
+        const vi  = NROWS - 1 - c.row;
+        const cy  = rowY0 + vi * rowGap;
+        const nx  = colX(c.col, c.cols) + NW / 2;
+        const ny  = cy - NH / 2;
+        const my  = (ny + targetY) / 2;
+
+        svg.appendChild(el('path', {
+          d: `M${nx} ${ny} C${nx} ${my},${careerCx} ${my},${careerCx} ${targetY}`,
+          fill:'none', stroke:'#D97706', 'stroke-width':'1.5',
+          opacity:'.4', 'stroke-dasharray':'5 4',
+        }));
+      });
   }
 
   function _drawExploreMajorBar(svg, selectedId) {
@@ -614,11 +650,11 @@ window.UniTree = (() => {
       const isSel = m.id === selectedId;
       const g = el('g', { style: isSel ? 'cursor:default;' : 'cursor:pointer;' });
 
-      // 카드 배경
+      // 카드 배경 — amber로 통일 (교과·진로 레이어와 색 충돌 없음)
       g.appendChild(el('rect', {
         x, y, width:EW, height:EH, rx:8,
-        fill:   isSel ? m.colorBg : '#F8FAFC',
-        stroke: isSel ? m.color  : '#E2E8F0',
+        fill:           isSel ? '#FFFBEB' : '#F8FAFC',
+        stroke:         isSel ? '#F59E0B' : '#E2E8F0',
         'stroke-width': isSel ? 1.5 : 1,
         opacity: isSel ? 1 : 0.75,
       }));
@@ -630,7 +666,7 @@ window.UniTree = (() => {
         'text-anchor':'middle', 'dominant-baseline':'middle',
         'font-size': isSel ? '10' : '9.5',
         'font-family':'Noto Sans KR,sans-serif',
-        fill: isSel ? m.color : '#94A3B8',
+        fill: isSel ? '#92400E' : '#94A3B8',
         'font-weight': isSel ? '700' : '400',
       }, isSel ? (m.id === 'ai' ? `🔒 ${m.name}` : `◎ ${m.name}`) : m.name));
 
@@ -643,7 +679,7 @@ window.UniTree = (() => {
           x: x + EW/2, y: cy + 9,
           'text-anchor':'middle', 'dominant-baseline':'middle',
           'font-size':'7.5', 'font-family':'Noto Sans KR,sans-serif',
-          fill: m.color, opacity:'0.8',
+          fill: '#F59E0B', opacity:'0.8',
         }, subText));
       }
 
@@ -659,53 +695,82 @@ window.UniTree = (() => {
   }
 
   function _drawExploreNode(svg, c, cy, md) {
-    const s = EXPLORE_STYLE[c.type];
-    const x = colX(c.col, c.cols);
-    const y = cy - NH / 2;
-    const g = el('g');
+    const hc   = App.state.exploreCareer;
+    const isHL = hc && c.car && c.car.includes(hc);
+    const s    = EXPLORE_STYLE[c.type];
+    const x    = colX(c.col, c.cols);
+    const y    = cy - NH / 2;
+    const g    = el('g');
 
-    const rect = el('rect', { x, y, width:NW, height:NH, rx:NR,
-      fill:s.fill, stroke:s.stroke, 'stroke-width':s.sw });
-    g.appendChild(rect);
+    // row 기반 베이스 색상: 과거(0)→amber, 3-2추가(1)→orange dashed, 미래(2/3)→gray
+    const ROW_STYLE = [
+      { fill:'#FFFBEB', stroke:'#F59E0B', text:'#92400E', sw:1.5 },
+      { fill:'#FFF7ED', stroke:'#FB923C', text:'#9A3412', sw:1.5, dash:'5 3' },
+      { fill:'#F8FAFC', stroke:'#E2E8F0', text:'#CBD5E1', sw:0.8 },
+      { fill:'#F8FAFC', stroke:'#E2E8F0', text:'#CBD5E1', sw:0.8 },
+    ];
+    const base = ROW_STYLE[c.row] || ROW_STYLE[3];
 
-    // 상태 배지
-    const ICON = { overlap:'✓', req:'●', ele:'○' };
-    const iColor = { overlap:'#10B981', req:'#8B5CF6', ele:'#3B82F6' };
+    // 진로 클릭 하이라이트: golden amber (진로 레이어 색과 구분)
+    const CAREER_HL = { fill:'#FEF3C7', stroke:'#D97706', text:'#92400E' };
+
+    const fill   = isHL ? CAREER_HL.fill   : base.fill;
+    const stroke = isHL ? CAREER_HL.stroke : base.stroke;
+    const sw     = isHL ? 2 : base.sw;
+    const textC  = isHL ? CAREER_HL.text   : base.text;
+
+    // 1) 배경 rect
+    g.appendChild(el('rect', { x, y, width:NW, height:NH, rx:NR,
+      fill, stroke, 'stroke-width':sw,
+      ...(base.dash && !isHL ? { 'stroke-dasharray':base.dash } : {}) }));
+
+    // 2) 타입 배지: row 2-3(미래)는 gray
+    const BADGE_CFG = {
+      overlap: { w:28, fill:'#10B981' },
+      req:     { w:16, fill:'#3B82F6' },
+      ele:     { w:16, fill:'#8B5CF6' },
+    };
+    const bd  = BADGE_CFG[c.type];
+    const bdFill = c.row >= 2 ? '#94A3B8' : bd.fill;
+    const bdX = x + NW - 2 - bd.w;
+    g.appendChild(el('rect', { x:bdX, y:y+3, width:bd.w, height:9, rx:2,
+      fill:bdFill, opacity:'.5' }));
+    g.appendChild(el('text', { x:bdX + bd.w/2, y:y+8.5, 'text-anchor':'middle',
+      'font-size':'5.5', 'font-family':'Noto Sans KR,sans-serif', fill:'#fff' },
+      s.label));
+
+    // 3) 아이콘: overlap(수강완료)→✓, req→□, ele→◇ / row 2-3는 회색
+    const ICONS  = { overlap:'✓', req:'□', ele:'◇' };
+    const iColorBase = { overlap:'#10B981', req:'#3B82F6', ele:'#8B5CF6' };
+    const iconColor = c.row >= 2 ? '#CBD5E1' : iColorBase[c.type];
     g.appendChild(el('text', { x:x+7, y:cy, 'text-anchor':'start',
-      'dominant-baseline':'middle', 'font-size':'8', fill:iColor[c.type],
-      'font-family':'Noto Sans KR,sans-serif' }, ICON[c.type]));
+      'dominant-baseline':'middle', 'font-size':'8', fill:iconColor,
+      'font-family':'Noto Sans KR,sans-serif' }, ICONS[c.type]));
 
-    // 과목명
+    // 4) 과목명
     let name = c.name;
     if (name.length > 8) name = name.slice(0,7) + '..';
     g.appendChild(el('text', { x:x+17, y:cy, 'text-anchor':'start',
-      'dominant-baseline':'middle', 'font-size':'9.5', fill:s.text,
-      'font-family':'Noto Sans KR,sans-serif',
-      'font-weight': c.type === 'overlap' ? '500' : '400' }, name));
-
-    // 타입 배지
-    const tcolor = { overlap:'#10B981', req:'#8B5CF6', ele:'#3B82F6' };
-    g.appendChild(el('rect', { x:x+NW-24, y:y+3, width:21, height:9, rx:2,
-      fill:tcolor[c.type], opacity:'.5' }));
-    g.appendChild(el('text', { x:x+NW-13.5, y:y+8.5, 'text-anchor':'middle',
-      'font-size':'5.5', 'font-family':'Noto Sans KR,sans-serif', fill:'#fff' },
-      s.label));
+      'dominant-baseline':'middle', 'font-size':'9.5',
+      fill: textC, 'font-family':'Noto Sans KR,sans-serif',
+      'font-weight': (c.row === 0 || isHL) ? '600' : '400' }, name));
 
     svg.appendChild(g);
   }
 
   function _drawExploreLanding(svg) {
-    // 전체 패널을 채우도록 넉넉한 viewBox 설정
     svg.setAttribute('viewBox', '0 0 580 480');
     svg.style.cssText = 'display:block;width:100%;min-height:100%;';
 
-    // 헤더 텍스트 — 카드 위 중앙 정렬 (카드 상단 y=160 기준)
+    // 따뜻한 amber 배경
+    svg.appendChild(el('rect', { x:0, y:0, width:SVG_W, height:480, fill:'#FFFBEB' }));
+
     svg.appendChild(el('text', { x:SVG_W/2, y:108, 'text-anchor':'middle',
-      'font-size':'13', fill:'#475569', 'font-family':'Noto Sans KR,sans-serif',
+      'font-size':'13', fill:'#92400E', 'font-family':'Noto Sans KR,sans-serif',
       'font-weight':'600' }, '탐구할 전공을 선택해주세요'));
 
     svg.appendChild(el('text', { x:SVG_W/2, y:128, 'text-anchor':'middle',
-      'font-size':'10', fill:'#94A3B8', 'font-family':'Noto Sans KR,sans-serif' },
+      'font-size':'10', fill:'#D97706', 'font-family':'Noto Sans KR,sans-serif' },
       '카드를 클릭하거나 채팅에서 선택할 수 있어요'));
 
     const majorList = Object.values(AppData.exploreData.majors);
@@ -714,42 +779,44 @@ window.UniTree = (() => {
     const startX = (SVG_W - total) / 2;
     const cardTop = 150;
 
+    // 카드별 amber 계열 색상
+    const WARM = [
+      { fill:'#FFFBEB', stroke:'#F59E0B', text:'#92400E', badge:'#FEF3C7' },
+      { fill:'#FFF7ED', stroke:'#FB923C', text:'#9A3412', badge:'#FFEDD5' },
+      { fill:'#FEF3C7', stroke:'#D97706', text:'#78350F', badge:'#FEF9C3' },
+    ];
+
     majorList.forEach((m, i) => {
       const cx = startX + i * (cw + cgap);
+      const wc = WARM[i % WARM.length];
       const g = el('g', { style:'cursor:pointer;' });
 
-      // 카드 배경
       g.appendChild(el('rect', { x:cx, y:cardTop, width:cw, height:ch, rx:12,
-        fill:m.colorBg, stroke:m.color, 'stroke-width':1.5 }));
+        fill:wc.fill, stroke:wc.stroke, 'stroke-width':1.5 }));
 
-      // 전공명
       g.appendChild(el('text', { x:cx+cw/2, y:cardTop+26, 'text-anchor':'middle',
-        'font-size':'12', fill:m.color, 'font-family':'Noto Sans KR,sans-serif',
+        'font-size':'12', fill:wc.text, 'font-family':'Noto Sans KR,sans-serif',
         'font-weight':'700' }, m.name));
 
-      // 태그 (서브타이틀)
       g.appendChild(el('text', { x:cx+cw/2, y:cardTop+44, 'text-anchor':'middle',
-        'font-size':'8', fill:m.color, 'font-family':'Noto Sans KR,sans-serif',
-        opacity:'0.75' }, m.tag));
+        'font-size':'8', fill:wc.stroke, 'font-family':'Noto Sans KR,sans-serif',
+        opacity:'0.85' }, m.tag));
 
-      // 구분선
       g.appendChild(el('line', { x1:cx+16, y1:cardTop+54, x2:cx+cw-16, y2:cardTop+54,
-        stroke:m.color, 'stroke-width':'0.6', opacity:'0.25' }));
+        stroke:wc.stroke, 'stroke-width':'0.6', opacity:'0.3' }));
 
-      // 학점 배지 — 모든 카드 동일 구조
       const badgeText = m.overlapCredits
         ? `중복인정 ${m.overlapCredits}학점 · 추가 ${m.extraCredits}학점`
         : '현재 주전공';
       g.appendChild(el('rect', { x:cx+12, y:cardTop+62, width:cw-24, height:18, rx:5,
-        fill:m.color, opacity:'.13' }));
+        fill:wc.stroke, opacity:'.15' }));
       g.appendChild(el('text', { x:cx+cw/2, y:cardTop+71, 'text-anchor':'middle',
-        'dominant-baseline':'middle', 'font-size':'8', fill:m.color,
+        'dominant-baseline':'middle', 'font-size':'8', fill:wc.text,
         'font-family':'Noto Sans KR,sans-serif', 'font-weight':'600' }, badgeText));
 
-      // 하단 클릭 힌트
       g.appendChild(el('text', { x:cx+cw/2, y:cardTop+97, 'text-anchor':'middle',
-        'font-size':'8', fill:m.color, 'font-family':'Noto Sans KR,sans-serif',
-        opacity:'0.5' }, '클릭하여 탐구 →'));
+        'font-size':'8', fill:wc.stroke, 'font-family':'Noto Sans KR,sans-serif',
+        opacity:'0.6' }, '클릭하여 탐구 →'));
 
       g.addEventListener('click', () => {
         App.state.exploreMajor = m.id;
